@@ -7,6 +7,14 @@ import pandas as pd
 import os
 import links
 
+def criar_driver():
+    options = webdriver.ChromeOptions()
+    # options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--ignore-certificate-errors')
+    driver = webdriver.Chrome(options)
+    return driver
+
 def get_html(driver, url):
     driver.get(url)
     WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, 'Opta-Stat')))
@@ -86,15 +94,14 @@ def criar_pasta(nome_pasta):
 def main(urls: list, driver=None):
 
     if not driver:
-        # Configurando o driver
-        options = webdriver.ChromeOptions()
-        # options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--ignore-certificate-errors')
-        driver = webdriver.Chrome(options)
+        driver = criar_driver()
+        
 
     for i,url in enumerate(urls):
+
         print(f'url: {i}/{len(urls)}')
+
+        # Pegar HTML da URL
         html = get_html(driver, url)
         soup = BeautifulSoup(html, 'html.parser')
 
@@ -107,8 +114,12 @@ def main(urls: list, driver=None):
         tab_casa = {coluna: [] for coluna in colunas}
         tab_fora = {coluna: [] for coluna in colunas}
 
+        
+
+        path_casa = os.path.join(os.getcwd(), 'Equipes', casa, f'{casa}.csv')
+        path_fora = os.path.join(os.getcwd(), 'Equipes', fora, f'{fora}.csv')
+
         # Criar pastas de cada time
-        path_casa = os.getcwd() + f'\\Equipes\\{casa}\\{casa}.csv'
         if not os.path.exists(path_casa):
             criar_pasta(casa)
             df_casa = pd.DataFrame(tab_casa)
@@ -120,7 +131,6 @@ def main(urls: list, driver=None):
             for linha in linhas_casa:
                 df_casa.loc[len(df_casa)] = linha
 
-        path_fora = os.getcwd() + '\\Equipes\\{casa}\\{casa}.csv'
         if not os.path.exists(path_fora):
             criar_pasta(fora)
             df_fora = pd.DataFrame(tab_fora)
@@ -143,12 +153,6 @@ def main(urls: list, driver=None):
 # main([url])
 
 url = 'https://optaplayerstats.statsperform.com/pt_BR/soccer/brasileir%C3%A3o-s%C3%A9rie-a-2024/a2yu8vfo8wha3vza31s2o8zkk/opta-player-stats'
-
-options = webdriver.ChromeOptions()
-# options.add_argument('--headless')
-options.add_argument('--disable-gpu')
-options.add_argument('--ignore-certificate-errors')
-
 
 urls, driver = links.main(url)
 

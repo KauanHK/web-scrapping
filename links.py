@@ -34,8 +34,8 @@ def main(url, driver=None):
     print('Configurando o driver')
 
     if not driver:
-        # options.add_argument('--headless')
         options = webdriver.ChromeOptions()
+        # options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         options.add_argument('--ignore-certificate-errors')
         driver = webdriver.Chrome(options)
